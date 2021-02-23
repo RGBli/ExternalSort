@@ -29,3 +29,6 @@ Temporary Items
 
 cmake-build-debug
 *.xml
+.idea
+*.txt
+test.cpp

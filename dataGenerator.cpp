@@ -17,7 +17,7 @@ int main()
     {
         data[i] = i + 1;
     }
-    ofstream output("1m.txt");
+    ofstream output("../1m.txt");
     // 用时钟初始化随机数种子
     srand((unsigned)time(0));
     // 打乱数据

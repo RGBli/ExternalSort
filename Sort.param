@@ -1,2 +1,2 @@
-path_input=1m.txt
-path_output=output.txt
+path_input=../1m.txt
+path_output=../output.txt

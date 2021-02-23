@@ -219,6 +219,7 @@ int generateSegment(string inputFile)
     string tmp;
     while (!in.eof())
     {
+        cout << "正在生成第" << count + 1 << "个顺序段..." << endl;
         while (i < SIZE && !in.eof())
         {
             in >> tmp;
@@ -245,6 +246,7 @@ int generateSegment(string inputFile)
             out << buf[j] << endl;
         }
         out.close();
+        cout << "第" << count << "个顺序段生成完毕" << endl;
         i = 0;
         cut = 0;
     }
@@ -258,7 +260,8 @@ void adjust(Segment *segments, int *ls, int n, int s)
     // 得到 s 的在败者树上面的父节点
     int t = (s + n) / 2;
     // 不断与父节点对比，直到败者树的根节点
-    while (t > 0) {
+    while (t > 0)
+    {
         if (s == -1)
         {
             break;
@@ -372,11 +375,18 @@ int main()
     string inputFile;
     string outputFile;
     // 读取参数
-    ifstream in("Sort.param");
+    cout << "正在解析参数" << endl;
+    ifstream in("../Sort.param");
+    if (!in.is_open())
+    {
+        cout << "Error opening file";
+        exit(1);
+    }
     string line;
     while (!in.eof())
     {
         in >> line;
+        cout << line << endl;
         if (line.find("path_input") == 0)
         {
             inputFile = line.substr(11);
@@ -387,6 +397,7 @@ int main()
         }
     }
     in.close();
+    cout << "参数解析完毕，开始生成顺序段" << endl;
 
     time_t start1, end1, start2, end2;
     start1 = clock();
@@ -396,6 +407,7 @@ int main()
     cout << "生成顺序段完成，共" << numOfSegment << "个顺序段" << "用时: " << double(end1 - start1) / CLOCKS_PER_SEC << "秒" << endl;
 
     start2 = clock();
+    cout << "开始归并顺序段..." << endl;
     int *ls = new int[numOfSegment];
     Segment *segments = new Segment[numOfSegment];
     mergeSort(segments, ls, numOfSegment, outputFile);
@@ -408,6 +420,7 @@ int main()
     for (int i = 1; i <= numOfSegment; i++)
     {
         string cmd = "rm " + to_string(i) + ".txt";
+        // string cmd = "del " + to_string(i) + ".txt";
         // 将 string 转为 system 函数要求的 char*
         system(cmd.data());
     }
