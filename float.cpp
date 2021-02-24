@@ -38,16 +38,14 @@ struct Segment
 /* 判断字符串是否能转为合法的 double*/
 bool isValid(string s)
 {
-    if (!regex_match(s, regex("[\\.\\deE-]+"))
-            || (s.find('-') != -1 && s.find_last_of('-') != 0)
-            || (s.find('.') != -1 && s.find_last_of('.') != s.find('.'))
-            || (s.find('e') != -1 && s.find_last_of('e') != s.find('e'))
-            || (s.find('E') != -1 && s.find_last_of('E') != s.find('E')))
+    string symbols = "-.eE";
+    for (char c : s)
     {
-        // 显示非法条目
-        cout << s << endl;
-        illegal++;
-        return false;
+        if (!isdigit(c) && symbols.find(c) != -1)
+        {
+            cout << "读取到第" << ++illegal << "个非法条目：" << s << endl;
+            return false;
+        }
     }
     return true;
 }
@@ -75,7 +73,7 @@ double stringToDouble(string s)
             res = -res;
         }
     }
-    // 非科学计数法，直接转数字
+        // 非科学计数法，直接转数字
     else
     {
         stringstream ss(s);
@@ -116,8 +114,7 @@ string doubleToString(double n)
     if (pointPos - firstNonZeroPos >= 1)
     {
         exp = pointPos - firstNonZeroPos - 1;
-    }
-    else
+    } else
     {
         exp = pointPos - firstNonZeroPos;
     }
@@ -141,7 +138,7 @@ string doubleToString(double n)
         {
             baseStr = baseStr.substr(0, 10);
         }
-        // 五入
+            // 五入
         else
         {
             bool bitFlag = true;
@@ -153,14 +150,12 @@ string doubleToString(double n)
                     {
                         baseStr[i] = '0';
                         bitFlag = true;
-                    }
-                    else
+                    } else
                     {
                         baseStr[i]++;
                         bitFlag = false;
                     }
-                }
-                else
+                } else
                 {
                     bitFlag = false;
                     break;
@@ -187,8 +182,7 @@ string doubleToString(double n)
             tmp.insert(0, 3 - tmp.length(), '0');
         }
         expStr = "E+" + tmp;
-    }
-    else
+    } else
     {
         if (tmp.length() < 3)
         {
@@ -199,8 +193,7 @@ string doubleToString(double n)
     if (!positiveFlag)
     {
         return "-" + baseStr + expStr;
-    }
-    else
+    } else
     {
         return baseStr + expStr;
     }
@@ -319,10 +312,10 @@ void mergeSort(Segment *segments, int *ls, int numOfSegment, string sortedFile)
     for (int i = 0; i < numOfSegment; i++)
     {
         int j = 0;
-        while(in[i] >> segments[i].buffer[j])
+        while (in[i] >> segments[i].buffer[j])
         {
             j++;
-            if(j == lengthPerSegment)
+            if (j == lengthPerSegment)
             {
                 break;
             }
@@ -386,12 +379,10 @@ int main()
     while (!in.eof())
     {
         in >> line;
-        cout << line << endl;
         if (line.find("path_input") == 0)
         {
             inputFile = line.substr(11);
-        }
-        else if (line.find("path_output") == 0)
+        } else if (line.find("path_output") == 0)
         {
             outputFile = line.substr(12);
         }
@@ -413,7 +404,7 @@ int main()
     mergeSort(segments, ls, numOfSegment, outputFile);
     end2 = clock();
     cout << "归并顺序段完成，" << "用时: " << double(end2 - start2) / CLOCKS_PER_SEC << "秒" << endl;
-    cout << "总用时: " <<  double(end2 - start1) / CLOCKS_PER_SEC << "秒" << endl;
+    cout << "总用时: " << double(end2 - start1) / CLOCKS_PER_SEC << "秒" << endl;
 
     // 删除顺序段
     cout << "正在删除临时文件..." << endl;
