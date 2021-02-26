@@ -1,9 +1,9 @@
+#include <__bit_reference>
 //
 // Created by lbw on 2021/2/17.
 //
 #include <iostream>
 #include <fstream>
-#include <sstream>
 #include <regex>
 #include <cmath>
 #include <cfloat>
@@ -53,31 +53,25 @@ bool isValid(string s)
 /* 将一行字符串转为 double*/
 double stringToDouble(string s)
 {
+    char *ptr;
     double res;
-    // 科学计数法，需要提取出 e 或 E 之前和之后的部分
-    if (s.find('e') != -1 || s.find('E') != -1)
+    // 科学计数法，需要提取出 E 之前和之后的部分
+    if (int posE = s.find('E') != -1)
     {
         // 判断正负号
         bool flag = (s[0] != '-');
-        // 找到 e 或 E 的位置
-        int posE = (s.find('e') == -1) ? s.find('E') : s.find('e');
-        double part1;
-        int part2;
-        stringstream ss1(s.substr(0, posE));
-        ss1 >> part1;
-        stringstream ss2(s.substr(posE + 2));
-        ss2 >> part2;
+        double part1 = strtod(s.substr(0, posE).data(), &ptr);
+        int part2 = atoi(s.substr(posE + 2).data());
         res = part1 * pow(10, part2);
         if (!flag)
         {
             res = -res;
         }
     }
-        // 非科学计数法，直接转数字
+    // 非科学计数法，直接转数字
     else
     {
-        stringstream ss(s);
-        ss >> res;
+        res = strtod(s.data(), &ptr);
     }
     return res;
 }
@@ -182,7 +176,8 @@ string doubleToString(double n)
             tmp.insert(0, 3 - tmp.length(), '0');
         }
         expStr = "E+" + tmp;
-    } else
+    }
+    else
     {
         if (tmp.length() < 3)
         {
@@ -193,19 +188,44 @@ string doubleToString(double n)
     if (!positiveFlag)
     {
         return "-" + baseStr + expStr;
-    } else
+    }
+    else
     {
         return baseStr + expStr;
     }
 }
 
+void quickSort(double arr[], int left, int right)
+{
+    if (left < right)
+    {
+        int i = left;
+        int j = right;
+        double tmp = arr[i];
+        while (i < j)
+        {
+            while (arr[j] >= tmp && i < j)
+            {
+                j--;
+            }
+            arr[i] = arr[j];
+            while (arr[i] <= tmp && i < j)
+            {
+                i++;
+            }
+            arr[j] = arr[i];
+        }
+        arr[i] = tmp;
+        quickSort(arr, left, i - 1);
+        quickSort(arr, i + 1, right);
+    }
+}
+
 /* 生成多个顺序段*/
-int generateSegment(string inputFile)
+int generateSegment(const string& inputFile)
 {
     ifstream in(inputFile);
     ofstream out;
-    string segmentOutputFile;
-    stringstream ss;
     // 记录最后一个 segment 截断的位置
     int cut = 0;
     int i = 0, count = 0;
@@ -226,14 +246,12 @@ int generateSegment(string inputFile)
             i++;
             cut++;
         }
-        // 对一个段排序
-        sort(buf, buf + cut);
+        // 对一个段进行内部排序
+        //sort(buf, buf + cut);
+        quickSort(buf, 0, cut - 1);
         count++;
         // 将顺序段写入文件
-        ss.str("");
-        ss << count << ".txt";
-        segmentOutputFile = ss.str();
-        out.open(segmentOutputFile);
+        out.open(to_string(count));
         for (int j = 0; j < cut; j++)
         {
             out << buf[j] << endl;
@@ -299,14 +317,9 @@ void mergeSort(Segment *segments, int *ls, int numOfSegment, string sortedFile)
     }
     // 为每个 segment 创建一个 input stream 来从段文件中读取
     ifstream in[numOfSegment];
-    string fileName;
-    stringstream ss;
     for (int i = 0; i < numOfSegment; i++)
     {
-        ss.str("");
-        ss << i + 1 << ".txt";
-        fileName = ss.str();
-        in[i].open(fileName);
+        in[i].open(to_string(i + 1));
     }
     // 将顺串文件的数据读到缓冲区中
     for (int i = 0; i < numOfSegment; i++)
@@ -410,8 +423,7 @@ int main()
     cout << "正在删除临时文件..." << endl;
     for (int i = 1; i <= numOfSegment; i++)
     {
-        string cmd = "rm " + to_string(i) + ".txt";
-        // string cmd = "del " + to_string(i) + ".txt";
+        string cmd = "rm " + to_string(i);
         // 将 string 转为 system 函数要求的 char*
         system(cmd.data());
     }

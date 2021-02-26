@@ -35,7 +35,10 @@ int main()
         {
             output << data[i];
         }
-        output << data[i] << endl;
+        else
+        {
+            output << data[i] << endl;
+        }
     }
     output.close();
     return 0;
