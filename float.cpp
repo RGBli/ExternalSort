@@ -1,4 +1,3 @@
-#include <__bit_reference>
 //
 // Created by lbw on 2021/2/17.
 //
@@ -9,7 +8,6 @@
 #include <cfloat>
 
 using namespace std;
-
 /* 缓冲区大小，每个8bytes*/
 #define SIZE 100000
 
@@ -24,6 +22,9 @@ double buf[SIZE];
 /* 非法条目数量*/
 int illegal = 0;
 
+/* 文件输出流，在全局定义会显著提高速度*/
+ofstream out;
+
 /* 多路归并阶段时的段*/
 struct Segment
 {
@@ -36,7 +37,7 @@ struct Segment
 };
 
 /* 判断字符串是否能转为合法的 double*/
-bool isValid(string s)
+bool isValid(const string& s)
 {
     string symbols = "-.eE";
     for (char c : s)
@@ -124,7 +125,7 @@ string doubleToString(double n)
     {
         baseStr.insert(baseStr.length(), 10 - baseStr.length(), '0');
     }
-        // 十位以上，四舍五入
+    // 十位以上，四舍五入
     else
     {
         // 四舍
@@ -132,7 +133,7 @@ string doubleToString(double n)
         {
             baseStr = baseStr.substr(0, 10);
         }
-            // 五入
+        // 五入
         else
         {
             bool bitFlag = true;
@@ -195,6 +196,7 @@ string doubleToString(double n)
     }
 }
 
+/* 快速排序*/
 void quickSort(double arr[], int left, int right)
 {
     if (left < right)
@@ -225,7 +227,6 @@ void quickSort(double arr[], int left, int right)
 int generateSegment(const string& inputFile)
 {
     ifstream in(inputFile);
-    ofstream out;
     // 记录最后一个 segment 截断的位置
     int cut = 0;
     int i = 0, count = 0;
@@ -256,7 +257,6 @@ int generateSegment(const string& inputFile)
         {
             out << buf[j] << endl;
         }
-        out.close();
         cout << "第" << count << "个顺序段生成完毕" << endl;
         i = 0;
         cut = 0;
@@ -337,7 +337,7 @@ void mergeSort(Segment *segments, int *ls, int numOfSegment, string sortedFile)
         segments[i].index = 0;
     }
     buildLoserTree(segments, ls, numOfSegment);
-    ofstream out(sortedFile);
+    out.open(sortedFile);
     // 剩下的 segment 个数
     int aliveSegments = numOfSegment;
     while (aliveSegments > 0)
@@ -406,7 +406,6 @@ int main()
     time_t start1, end1, start2, end2;
     start1 = clock();
     int numOfSegment = generateSegment(inputFile);
-    //int numOfSegment = 3;
     end1 = clock();
     cout << "生成顺序段完成，共" << numOfSegment << "个顺序段" << "用时: " << double(end1 - start1) / CLOCKS_PER_SEC << "秒" << endl;
 
