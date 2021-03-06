@@ -22,9 +22,6 @@ double buf[SIZE];
 /* 非法条目数量*/
 int illegal = 0;
 
-/* 文件输出流，在全局定义会显著提高速度*/
-ofstream out;
-
 /* 多路归并阶段时的段*/
 struct Segment
 {
@@ -39,10 +36,9 @@ struct Segment
 /* 判断字符串是否能转为合法的 double*/
 bool isValid(const string& s)
 {
-    string symbols = "-.eE";
     for (char c : s)
     {
-        if (!isdigit(c) && symbols.find(c) != -1)
+        if (!isdigit(c) && c != '-' && c != '.' && c != 'e' && c != 'E')
         {
             cout << "读取到第" << ++illegal << "个非法条目：" << s << endl;
             return false;
@@ -226,7 +222,7 @@ void quickSort(double arr[], int left, int right)
 /* 生成多个顺序段*/
 int generateSegment(const string& inputFile)
 {
-    ifstream in(inputFile);
+    ifstream in(inputFile, ios::binary);
     // 记录最后一个 segment 截断的位置
     int cut = 0;
     int i = 0, count = 0;
@@ -237,6 +233,7 @@ int generateSegment(const string& inputFile)
         while (i < SIZE && !in.eof())
         {
             in >> tmp;
+            //in >> buf[i];
             // 判断是否有效
             if (!isValid(tmp))
             {
@@ -248,15 +245,18 @@ int generateSegment(const string& inputFile)
             cut++;
         }
         // 对一个段进行内部排序
-        //sort(buf, buf + cut);
-        quickSort(buf, 0, cut - 1);
+        sort(buf, buf + cut);
+        //quickSort(buf, 0, cut - 1);
         count++;
         // 将顺序段写入文件
-        out.open(to_string(count));
+        ofstream out(to_string(count), ios::binary);
         for (int j = 0; j < cut; j++)
         {
-            out << buf[j] << endl;
+            //out << buf[j] << endl;
+            out.write((to_string(buf[j]) + "\n").data(), to_string(buf[j]).length() + 1);
         }
+        out.close();
+        out.clear();
         cout << "第" << count << "个顺序段生成完毕" << endl;
         i = 0;
         cut = 0;
@@ -319,7 +319,7 @@ void mergeSort(Segment *segments, int *ls, int numOfSegment, string sortedFile)
     ifstream in[numOfSegment];
     for (int i = 0; i < numOfSegment; i++)
     {
-        in[i].open(to_string(i + 1));
+        in[i].open(to_string(i + 1), ios::binary);
     }
     // 将顺串文件的数据读到缓冲区中
     for (int i = 0; i < numOfSegment; i++)
@@ -337,14 +337,15 @@ void mergeSort(Segment *segments, int *ls, int numOfSegment, string sortedFile)
         segments[i].index = 0;
     }
     buildLoserTree(segments, ls, numOfSegment);
-    out.open(sortedFile);
+    ofstream out(sortedFile, ios::binary);
     // 剩下的 segment 个数
     int aliveSegments = numOfSegment;
     while (aliveSegments > 0)
     {
         // 输出败者树的根节点 ls[0] 对应的数字到文件中
-        out << doubleToString(segments[ls[0]].buffer[segments[ls[0]].index++]);
-        //out << segments[ls[0]].buffer[segments[ls[0]].index++] << endl;
+        string content = doubleToString(segments[ls[0]].buffer[segments[ls[0]].index++]);
+        out.write(content.data(), content.length());
+        //out.write(to_string(segments[ls[0]].buffer[segments[ls[0]].index++]).data(), to_string(segments[ls[0]].buffer[segments[ls[0]].index++]).length());
         // 一个 segment 的缓冲区读完了，需要再读一批到该 segment 的缓冲区中
         if (segments[ls[0]].index == segments[ls[0]].length)
         {
@@ -370,7 +371,7 @@ void mergeSort(Segment *segments, int *ls, int numOfSegment, string sortedFile)
         // 避免在末尾产生空行
         if (aliveSegments > 0)
         {
-            out << endl;
+            out.write("\n", 1);
         }
     }
 }
