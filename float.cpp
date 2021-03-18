@@ -50,14 +50,15 @@ bool isValid(const string& s)
 /* 将一行字符串转为 double*/
 double stringToDouble(string s)
 {
-    char *ptr;
     double res;
-    // 科学计数法，需要提取出 E 之前和之后的部分
+    // 科学计数法，需要提取出 E 之前和之后的部分，posE 记录 E 的位置
     if (int posE = s.find('E') != -1)
     {
         // 判断正负号
         bool flag = (s[0] != '-');
-        double part1 = strtod(s.substr(0, posE).data(), &ptr);
+        // atof 函数是将 char* 转为 double，使用 .data() 将字符串转为 char*
+        double part1 = atof(s.substr(0, posE).data());
+        // atoi 函数是将 char* 转为 int
         int part2 = atoi(s.substr(posE + 2).data());
         res = part1 * pow(10, part2);
         if (!flag)
@@ -68,7 +69,7 @@ double stringToDouble(string s)
     // 非科学计数法，直接转数字
     else
     {
-        res = strtod(s.data(), &ptr);
+        res = atof(s.data());
     }
     return res;
 }
@@ -233,7 +234,6 @@ int generateSegment(const string& inputFile)
         while (i < SIZE && !in.eof())
         {
             in >> tmp;
-            //in >> buf[i];
             // 判断是否有效
             if (!isValid(tmp))
             {
@@ -396,7 +396,8 @@ int main()
         if (line.find("path_input") == 0)
         {
             inputFile = line.substr(11);
-        } else if (line.find("path_output") == 0)
+        }
+        else if (line.find("path_output") == 0)
         {
             outputFile = line.substr(12);
         }
